@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="test">
+    <title>Chieri Bot AI Draw</title>
+    <link rel="stylesheet" type="text/css" href="css/1s.css">
+</head>
+<body onload="login_load_cookie()">
+
+<div>
+    <label id="label_input">
+        QQ: <input type="text" id="qq"><br>
+        密码: <input type="password" id="passwd"><br>
+        <label id="label_recheck_passwd" style="display: none">
+            确认密码: <input type="password" id="recheck_passwd">
+        </label>
+        <br>
+        <input type="submit" value="登录" onclick="login()">
+        <input type="submit" value="注册" onclick="register()">
+    </label>
+    <br><a href="reset_password.html">修改密码</a>
+    <br><a href="https://chieri.docs.chinosk6.cn/group/aidraw.html">帮助文档</a>
+</div>
+
+
+<script src="js/index.js"></script>
+<script src="js/generate_image.js"></script>
+</body>
+</html>
