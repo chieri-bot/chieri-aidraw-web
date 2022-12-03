@@ -3,123 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <title>Chieri Bot AI Draw</title>
-    <link rel="stylesheet" type="text/css" href="css/1s.css">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/card.css">
+    <link rel="stylesheet" type="text/css" href="css/loading.css">
 </head>
-<body onload="load_cookie()">
+<body onload="gene_on_load()" class="tbg" onresize="change_size()">
 
-<div>
-    <div class="bd">
-        <div class="labeltext">生成标签: </div>
-        <label for="tags">
-        <textarea id="tags" rows="5" cols="30"></textarea>
-        </label>
+<div class="card" style="max-width: none; text-align: center">
+
+    <div class="inputarea" id="div_img" style="text-align: center">
+        <div class="labeltext" style="text-align: left">生成结果: </div>
+        <img src="" id="aiimg" alt="Generated Image" class="generatedimg">
     </div>
 
-    <div class="bd">
-        <div class="labeltext">使用模型:</div>
-        <label for="model">
-        <select id="model">
-            <option value="safe-diffusion">safe-diffusion</option>
-            <option value="nai-diffusion">nai-diffusion</option>
-            <option value="nai-diffusion-furry">nai-diffusion-furry</option>
-        </select></label>
-    </div>
-
-    <div class="bd">
-        <div class="labeltext">图片方向:</div>
-        <label for="ratio"><select id="ratio">
-        <option value="0">竖向</option>
-        <option value="1">方形</option>
-        <option value="2">横向</option>
-        </select></label>
-    </div>
-
-    <div class="bd">
-        <div class="labeltext">种子:</div>
-        <label>
-            <input type="number" id="seed" step="1" value="0" min="0" max="4294967295">
-            随机: <input type="checkbox" id="seed_random" onclick="change_seed_box_state()">
-        </label>
-    </div>
-
-    <div class="bd">
-        <div class="labeltext">排除负面标签:</div>
-        <label for="uc">
-            <textarea id="uc" rows="5" cols="30">lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry</textarea>
-        </label>
-    </div>
-
-    <div class="bd">
-        <div class="labeltext">Scale:</div>
-        <label for="scale">
-            <input type="number" id="scale" value="12">
-        </label>
-    </div>
-
-    <div class="bd">
-        <div class="labeltext">图生图 (需要额外消耗 1 点数):</div>
-        <label for="upload_img">
-            <input type="file" id="upload_img"> <br>
-            <input type="submit" id="clear_upload_img" value="清除选择的图片" onclick="clear_uploadimg_select()">
-        </label>
-    </div>
-
-    <div style="padding-top: 5px; padding-bottom: 5px">
-        <a style="color: slateblue; text-decoration: none" href="javascript:void(0);" onclick="show_adv_settings()">高级设置</a>
-    </div>
-
-    <div id="adv_settings" style="display: none">
+    <div class="inputarea" id="div_input" style="max-width: 25em">
         <div class="bd">
-            <div class="labeltext">采样器:</div>
-            <label for="sampler"><select id="sampler">
-                <option value="k_euler_ancestral">k_euler_ancestral</option>
-                <option value="k_euler">k_euler</option>
-                <option value="k_lms">k_lms</option>
-                <option value="plms">plms</option>
-                <option value="ddim">ddim</option>
+            <div class="labeltext">生成标签: </div>
+            <label for="tags">
+                <textarea id="tags" rows="5" cols="30" class="labelinput"></textarea>
+            </label>
+        </div>
+
+        <div class="bd">
+            <div class="labeltext">使用模型:</div>
+            <label for="model">
+                <select id="model" class="labelswitch">
+                    <option value="safe-diffusion">safe-diffusion</option>
+                    <option value="nai-diffusion">nai-diffusion</option>
+                    <option value="nai-diffusion-furry">nai-diffusion-furry</option>
+                </select></label>
+        </div>
+
+        <div class="bd">
+            <div class="labeltext">图片方向:</div>
+            <label for="ratio"><select id="ratio" class="labelswitch">
+                <option value="0">竖向</option>
+                <option value="1">方形</option>
+                <option value="2">横向</option>
             </select></label>
         </div>
 
         <div class="bd">
-            <div class="labeltext">Strength:</div>
-            <label for="strength">
-                <input type="number" id="strength" step="0.1" value="0.7" min="0" max="1">
+            <div class="labeltext">种子:</div>
+            <label>
+                <input type="number" id="seed" step="1" value="0" min="0" max="4294967295" class="labelinput">
+                随机: <input type="checkbox" id="seed_random" onclick="change_seed_box_state()">
             </label>
         </div>
 
         <div class="bd">
-            <div class="labeltext">Noise:</div>
-            <label for="noise">
-                <input type="number" id="noise" step="0.1" value="0.2" min="0" max="1">
+            <div class="labeltext">排除负面标签:</div>
+            <label for="uc">
+                <textarea id="uc" rows="5" cols="30" class="labelinput">lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry</textarea>
             </label>
         </div>
 
         <div class="bd">
-            <div class="labeltext">ucPreset:</div>
-            <label for="ucPreset">
-                <input type="number" id="ucPreset" value="0">
+            <div class="labeltext">Scale:</div>
+            <label for="scale">
+                <input type="number" id="scale" value="12" class="labelinput">
             </label>
         </div>
-        <div style="padding-top: 5px; padding-bottom: 5px">
-            <a style="color: slateblue; text-decoration: none" href="javascript:void(0);" onclick="hide_adv_settings()">收起</a>
+
+        <div class="bd">
+            <div class="labeltext">图生图 (需要额外消耗 1 点数):</div>
+            <label for="upload_img">
+                <input type="file" id="upload_img" class="labelbtn"> <br>
+                <input type="submit" id="clear_upload_img" value="清除选择的图片" onclick="clear_uploadimg_select()" class="labelbtn">
+            </label>
+        </div>
+
+        <div style="padding-top: 5px; padding-bottom: 5px; padding-left: 1em">
+            <a style="color: slateblue; text-decoration: none" href="javascript:void(0);" onclick="show_adv_settings()">高级设置</a>
+
+            <div id="adv_settings" style="display: none">
+                <div class="bd">
+                    <div class="labeltext">采样器:</div>
+                    <label for="sampler"><select id="sampler" class="labelswitch">
+                        <option value="k_euler_ancestral">k_euler_ancestral</option>
+                        <option value="k_euler">k_euler</option>
+                        <option value="k_lms">k_lms</option>
+                        <option value="plms">plms</option>
+                        <option value="ddim">ddim</option>
+                    </select></label>
+                </div>
+
+                <div class="bd">
+                    <div class="labeltext">Strength:</div>
+                    <label for="strength">
+                        <input type="number" id="strength" step="0.1" value="0.7" min="0" max="1" class="labelinput">
+                    </label>
+                </div>
+
+                <div class="bd">
+                    <div class="labeltext">Noise:</div>
+                    <label for="noise">
+                        <input type="number" id="noise" step="0.1" value="0.2" min="0" max="1" class="labelinput">
+                    </label>
+                </div>
+
+                <div class="bd">
+                    <div class="labeltext">ucPreset:</div>
+                    <label for="ucPreset">
+                        <input type="number" id="ucPreset" value="0" class="labelinput">
+                    </label>
+                </div>
+                <div style="padding-top: 5px; padding-bottom: 5px">
+                    <a style="color: slateblue; text-decoration: none" href="javascript:void(0);" onclick="hide_adv_settings()">收起</a>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="padding-top: 5px; padding-left: 1em" id="gene_space">
+            <input type="submit" id="btn_start_generate_image" value="开始生成" onclick="start_generate_image()" class="labelbtn">
+            <span>剩余点数:</span> <span id="left_point">0</span>
+            <div class="loader" id="gene_loading" style="width: 16px; height: 16px"></div>
+        </div>
+
+        <div style="padding-top: 30px; padding-right: 1em; text-align: right" id="account_space">
+            <a href="https://chieri.docs.chinosk6.cn/group/aidraw.html" target="_blank" class="labeltext">帮助文档</a>
+            <input type="submit" id="btn_logout" value="登出" onclick="logout()" class="labelbtn">
         </div>
     </div>
-
-    <div style="padding-top: 10px" id="gene_space">
-        <input type="submit" id="btn_start_generate_image" value="开始生成" onclick="start_generate_image()">
-        <span>剩余点数:</span> <span id="left_point">0</span>
-    </div>
-
-    <div style="padding-top: 30px" id="account_space">
-        <input type="submit" id="btn_logout" value="登出" onclick="logout()">
-        <br><a href="https://chieri.docs.chinosk6.cn/group/aidraw.html" target="_blank">帮助文档</a>
-    </div>
-
-    <br><br>
-    <img src="" id="aiimg" alt="Generated Image">
 
 </div>
 
+
+<script src="js/global.js"></script>
 <script src="js/index.js"></script>
 <script src="js/generate_image.js"></script>
 </body>

@@ -1,5 +1,4 @@
 
-var api_endpoint = "https://www.chinosk6.cn/backend"
 var adv_settings_is_show = false;
 var chieri_token = "";
 var chieri_expiration_time = 0;
@@ -31,6 +30,11 @@ function show_adv_settings() {
 function hide_adv_settings() {
     document.getElementById("adv_settings").style.display = "none";
     adv_settings_is_show = false;
+}
+
+function gene_on_load() {
+    change_size()
+    load_cookie()
 }
 
 function load_cookie() {
@@ -137,6 +141,7 @@ function base64toBlob(dataurl) {
 
 function start_generate_image() {
     document.getElementById("btn_start_generate_image").disabled = true;
+    document.getElementById("gene_loading").style.display = "inline-table";
     let myHeaders = new Headers();
     myHeaders.append("Authorization", `chieribot ${chieri_token}`);
 
@@ -190,14 +195,15 @@ function start_generate_image() {
                     add_text_child_gene(`您的登录已过期, 请刷新页面重新登录。`);
                 }
             }
-            update_left_point();
-            document.getElementById("btn_start_generate_image").disabled = false;
         }))
         .catch(error => {
             console.log('error', error);
-            document.getElementById("btn_start_generate_image").disabled = false;
-            update_left_point();
             add_text_child_gene(`生成失败: ${error}`);
+        })
+        .finally(() => {
+            update_left_point();
+            document.getElementById("gene_loading").style.display = "none";
+            document.getElementById("btn_start_generate_image").disabled = false;
         });
 }
 
@@ -226,4 +232,30 @@ function logout() {
             }
         }))
         .catch(error => console.log('error', error));
+}
+
+
+function change_size() {
+
+    let div_input = document.getElementById("div_input");
+    let div_img = document.getElementById("div_img");
+    let aiimg = document.getElementById("aiimg");
+    // console.log(document.body.clientWidth);
+    if (document.body.clientWidth >= 888 && document.documentElement.clientWidth > document.documentElement.clientHeight) {
+        div_input.style.display = "inline-table";
+        div_img.style.display = "inline-table";
+
+        div_img.style.width = `${document.body.clientWidth - 600}px`;
+        div_img.style.height = `${div_input.offsetHeight - 30}px`;
+    }
+    else {
+        div_input.style.display = "table";
+        div_img.style.display = "table";
+
+        div_img.style.width = `${div_input.offsetWidth - 10}px`;
+        div_img.style.height = "auto";
+    }
+    aiimg.style.maxWidth = `${div_img.offsetWidth - 30}px`;
+    aiimg.style.width = "auto";
+    aiimg.style.height = "auto";
 }

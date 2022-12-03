@@ -1,5 +1,4 @@
 
-var api_endpoint = "https://www.chinosk6.cn/backend"
 var tlb = null;
 
 function add_text_child(text) {
@@ -11,10 +10,16 @@ function add_text_child(text) {
 }
 
 function login() {
+    document.getElementById("label_recheck_passwd").style.display = "none";
     let qq = document.getElementById("qq").value;
     let passwd = document.getElementById("passwd").value;
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
+
+    if (qq === "" || passwd === "") {
+        alert("请输入数据");
+        return false;
+    }
 
     const raw = JSON.stringify({
         "qq": qq,
@@ -53,15 +58,19 @@ function login() {
 function register() {
     let recheck_passwd = document.getElementById("label_recheck_passwd");
     if (recheck_passwd.style.display === "none") {
-        recheck_passwd.style.display = "block";
-        return;
+        recheck_passwd.style.display = "flex";
+        return false;
     }
     let qq = document.getElementById("qq").value;
     let passwd = document.getElementById("passwd").value;
     let passwd_check = document.getElementById("recheck_passwd").value;
     if (passwd !== passwd_check) {
         alert("两次密码输入不一致");
-        return;
+        return false;
+    }
+    if (qq === "" || passwd === "") {
+        alert("请输入数据");
+        return false;
     }
 
     const myHeaders = new Headers();
@@ -92,6 +101,7 @@ function register() {
             });
         })
         .catch(error => console.log('error', error));
+    return false
 }
 
 function login_load_cookie() {

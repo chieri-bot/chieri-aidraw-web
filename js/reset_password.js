@@ -1,6 +1,4 @@
 
-var api_endpoint = "https://www.chinosk6.cn/backend"
-
 function reset_password() {
     let qq = document.getElementById("qq").value;
     let check_code = document.getElementById("check_code").value;

@@ -2,12 +2,13 @@
 .bd {
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 0.5em;
 
     align-items: center;
     gap: .5em;
     border-radius: 4px;
-    padding-top: 1em;
     padding-left: 1em;
+    padding-right: 1em;
 }
 
 .labelinput {
@@ -16,11 +17,17 @@
     margin-top: 5px;
     background: transparent;
     border: 1px solid #280202;
+    color: #f3f3f3;
 }
 
 
 .labelswitch {
-
+    margin-top: 3px;
+    color: #090909;
+    padding: 0.5em 0.5em;
+    border-radius: 0.5em;
+    border: 1px solid #e8e8e8;
+    transition: all .3s;
 }
 
 .labelbtn {
@@ -28,7 +35,6 @@
     color: #090909;
     padding: 0.5em 0.5em;
     border-radius: 0.5em;
-    background: #e8e8e8;
     border: 1px solid #e8e8e8;
     transition: all .3s;
 }
@@ -43,20 +49,23 @@
 }
 
 .labelbtn:disabled {
-
+    color: #837d7d;
 }
 
 .labeltext {
-
+    color: #f3f3f3;
 }
 
 .tbg {
-    background: linear-gradient(to left, #f7ba2b 0%, #ff1b6b 100%);
+    // background: linear-gradient(to left, #f7ba2b 0%, #ff1b6b 100%);
+    background: linear-gradient(45deg, #15162a 0%, #621229 100%);
 }
 
 .inputarea {
-    padding-top: 1em;
-    padding-bottom: 1em;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 1em;
+    padding: 1em 0.5em;
     text-align: left;
     border-radius: 1rem;
     overflow: visible;
@@ -67,4 +76,8 @@
     backdrop-filter: blur(10px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     color: #fff;
+}
+
+.generatedimg {
+
 }
