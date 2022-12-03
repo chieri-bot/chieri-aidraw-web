@@ -1,0 +1,70 @@
+.cred {color: red}
+.bd {
+    margin-left: auto;
+    margin-right: auto;
+
+    align-items: center;
+    gap: .5em;
+    border-radius: 4px;
+    padding-top: 1em;
+    padding-left: 1em;
+}
+
+.labelinput {
+    border-radius: 10px;
+    padding: 5px 5px;
+    margin-top: 5px;
+    background: transparent;
+    border: 1px solid #280202;
+}
+
+
+.labelswitch {
+
+}
+
+.labelbtn {
+    margin-top: 3px;
+    color: #090909;
+    padding: 0.5em 0.5em;
+    border-radius: 0.5em;
+    background: #e8e8e8;
+    border: 1px solid #e8e8e8;
+    transition: all .3s;
+}
+
+.labelbtn:hover {
+    border: 1px solid white;
+}
+
+.labelbtn:active {
+    box-shadow: 4px 4px 12px #c5c5c5,
+    -4px -4px 12px #ffffff;
+}
+
+.labelbtn:disabled {
+
+}
+
+.labeltext {
+
+}
+
+.tbg {
+    background: linear-gradient(to left, #f7ba2b 0%, #ff1b6b 100%);
+}
+
+.inputarea {
+    padding-top: 1em;
+    padding-bottom: 1em;
+    text-align: left;
+    border-radius: 1rem;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    color: #fff;
+}
