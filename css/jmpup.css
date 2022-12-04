@@ -1,0 +1,36 @@
+.mask{
+    position:fixed;
+    z-index:99;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background:rgba(0,0,0,.3)
+}
+.basePop{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+    z-index:999;
+    margin-left: 8px;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    border: 1px solid #999999;
+    border-radius: 2px;
+    width: auto;
+    font-family: 'Microsoft yahei', system-ui;
+}
+.basePop .close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 2;
+    color: #999999;
+    font-size: 24px;
+    text-decoration:none;
+}
+.basePop .popBd {
+    padding: 30px 20px;
+    text-align: center;
+}

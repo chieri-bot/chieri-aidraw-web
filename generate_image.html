@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="css/card.css">
     <link rel="stylesheet" type="text/css" href="css/loading.css">
+    <link rel="stylesheet" type="text/css" href="css/jmpup.css">
 </head>
 <body onload="gene_on_load()" class="tbg" onresize="change_size()">
 
@@ -118,6 +119,7 @@
 
         <div style="padding-top: 5px; padding-left: 1em" id="gene_space">
             <input type="submit" id="btn_start_generate_image" value="开始生成" onclick="start_generate_image()" class="labelbtn">
+            <input type="submit" value="生成历史" onclick="show_generate_history_lst()" class="labelbtn">
             <span>剩余点数:</span> <span id="left_point">0</span>
             <div class="loader" id="gene_loading" style="width: 16px; height: 16px"></div>
         </div>
@@ -128,11 +130,32 @@
         </div>
     </div>
 
+    <div id="div_hist" style="display: none">
+        <div class="basePop">
+            <a href="javascript:void(0);" class="close" onclick="hide_generate_history_lst()">×</a>
+            <div class="popBd">
+                <div class="inputarea">
+                    <div id="div_gene_hist" class="generatedimghistory">
+                    </div>
+                </div>
+            </div>
+            <label for="saveanddelete" style="color: #837d7d; font-size: 14px">
+                保存后清除历史
+                <input type="checkbox" id="saveanddelete" name="dasdsa">
+            </label>
+            <button id="save_btn" class="labelbtn" onclick="downloadAllImg()" style="margin-bottom: 20px">保存全部图片</button>
+            <div class="loader" id="save_loading" style="width: 16px; height: 16px"></div>
+        </div>
+        <div class="mask" onclick="hide_generate_history_lst()"></div>
+    </div>
+
 </div>
 
 
 <script src="js/global.js"></script>
 <script src="js/index.js"></script>
 <script src="js/generate_image.js"></script>
+<script src="js/jszip.min.js"></script>
+<script src="js/FileSaver.min.js"></script>
 </body>
 </html>

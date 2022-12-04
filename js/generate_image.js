@@ -1,10 +1,12 @@
 
+
 var adv_settings_is_show = false;
 var chieri_token = "";
 var chieri_expiration_time = 0;
 // var chieri_user_qq = "";
 
 var tlb_gene_im = null;
+let imghist_is_close = true;
 
 function add_text_child_gene(text) {
     if (tlb_gene_im != null) {
@@ -186,7 +188,9 @@ function start_generate_image() {
             if (is_success) {
                 let img_b64 = parsedJson["image"];
                 // document.getElementById("aiimg").src = `data:image/png;base64,${img_b64}`;
-                document.getElementById("aiimg").src = URL.createObjectURL(base64toBlob(`data:image/png;base64,${img_b64}`));
+                let imgurl = URL.createObjectURL(base64toBlob(`data:image/png;base64,${img_b64}`));
+                document.getElementById("aiimg").src = imgurl;
+                add_generate_history_lst(imgurl)
             }
             else {
                 add_text_child_gene(`生成失败: ${msg}`);
@@ -234,28 +238,139 @@ function logout() {
         .catch(error => console.log('error', error));
 }
 
+function getViewPortHeight() {
+    return document.documentElement.clientHeight || document.body.clientHeight;
+}
 
 function change_size() {
-
     let div_input = document.getElementById("div_input");
     let div_img = document.getElementById("div_img");
     let aiimg = document.getElementById("aiimg");
+    let div_gene_hist = document.getElementById("div_gene_hist");
     // console.log(document.body.clientWidth);
     if (document.body.clientWidth >= 888 && document.documentElement.clientWidth > document.documentElement.clientHeight) {
         div_input.style.display = "inline-table";
         div_img.style.display = "inline-table";
-
         div_img.style.width = `${document.body.clientWidth - 600}px`;
         div_img.style.height = `${div_input.offsetHeight - 30}px`;
+        div_gene_hist.style.height = `${getViewPortHeight() * 0.65}px`;
     }
     else {
         div_input.style.display = "table";
         div_img.style.display = "table";
-
         div_img.style.width = `${div_input.offsetWidth - 10}px`;
         div_img.style.height = "auto";
+        div_gene_hist.style.height = `${getViewPortHeight() * 0.55}px`;
     }
     aiimg.style.maxWidth = `${div_img.offsetWidth - 30}px`;
     aiimg.style.width = "auto";
     aiimg.style.height = "auto";
+    div_gene_hist.style.width = `${document.body.clientWidth * 0.75}px`;
+}
+
+function show_generate_history_lst() {
+    document.getElementById("div_hist").style.display = "block";
+}
+
+function hide_generate_history_lst() {
+    document.getElementById("div_hist").style.display = "none";
+}
+
+function add_generate_history_lst(image) {
+    let newediv = document.createElement("div");
+    newediv.className = "imghist_div";
+    newediv.onclick = function () {
+        gene_img_lst_onclick(this);
+    };
+    let delBtn = document.createElement("a");
+    delBtn.innerHTML = "×"
+    delBtn.href = "javascript:void(0);";
+    delBtn.className = "imghist_close";
+    delBtn.onclick = function () {
+        remove_gene_img(newediv);
+    }
+    newediv.appendChild(delBtn)
+    newediv.style.backgroundImage = `url(${image})`
+    // let newimg = document.createElement("img");
+    // newimg.src = image;
+    // newimg.className = "imghist_img";
+    // newediv.appendChild(newimg);
+    let lst = document.getElementById("div_gene_hist");
+    lst.appendChild(newediv);
+}
+
+function gene_img_lst_onclick(im_div) {
+    let back_img = im_div.style.backgroundImage;
+    document.getElementById("aiimg").src = back_img.substring(5, back_img.length - 2);
+    if (imghist_is_close) {
+        hide_generate_history_lst();
+    }
+    else {
+        imghist_is_close = true;
+    }
+    // let rs = im_div.getElementsByTagName("img");
+    // if (rs.length > 0) {
+    //     document.getElementById("aiimg").src = rs[0].src;
+    //     hide_generate_history_lst();
+    // }
+}
+
+function remove_gene_img(im_div) {
+    imghist_is_close = false;
+    if (confirm("是否清除此图片？")) {
+        im_div.remove();
+    }
+}
+
+function image_url_to_b64(url, num, callback){
+    let canvas = document.createElement('canvas')
+    let context = canvas.getContext('2d')
+    let img = new Image
+    img.crossOrigin = 'Anonymous'
+    img.onload = function(){
+        canvas.width = img.width
+        canvas.height = img.height
+        context.drawImage(img,0,0)
+        let URLData = canvas.toDataURL('image/png')
+        callback(url, URLData, num);
+        canvas = null
+    }
+    img.src = url
+}
+
+function downloadAllImg() {
+    let zip = new JSZip();
+    let div_gene_hist = document.getElementById("div_gene_hist");
+    let div_imgs = div_gene_hist.getElementsByTagName("div");
+    let finished_count = 0;
+    let save_loading = document.getElementById("save_loading");
+    let save_btn = document.getElementById("save_btn");
+
+    function on_image_loaded(url, b64data, num) {
+        zip.file(`${num}.png`, b64data.substring("data:image/png;base64,".length), {base64: true});
+        finished_count++;
+        // URL.revokeObjectURL(url);
+        if (finished_count >= div_imgs.length) {
+            save_loading.style.display = "none";
+            save_btn.disabled = false;
+            zip.generateAsync({type:"blob"}).then(function(content) {
+                saveAs(content, "chieri_ai_image.zip");
+            });
+            if (document.getElementById("saveanddelete").checked) {
+                div_gene_hist.innerHTML = "";
+            }
+        }
+    }
+
+    if (div_imgs.length > 0) {
+        save_loading.style.display = "inline-table";
+        save_btn.disabled = true;
+        for (let n = 0; n < div_imgs.length; n++) {
+            const img_url = div_imgs[n].style.backgroundImage.substring(5, div_imgs[n].style.backgroundImage.length - 2);
+            image_url_to_b64(img_url, n, on_image_loaded);
+        }
+    }
+    else {
+        alert("没有需要保存的图片");
+    }
 }
