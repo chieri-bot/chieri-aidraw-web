@@ -4,33 +4,44 @@ import {BaseRetData, GetCostResponse, LeftPointResponse, LoginData, UserInfo} fr
 const apiEndpoint = import.meta.env.VITE_API_ENDPOINT
 
 
-export async function fetchAPI(path: string, method: string, body?: any) {
+export async function fetchAPI(path: string, method: string, body?: any, headers?: any) {
+    const baseHeaders = {...{
+            "Authorization": `chieribot ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json"
+        }}
+    let reqHeaders: any
+    if (headers) {
+        reqHeaders = {...baseHeaders, ...headers}
+    }
+    else {
+        reqHeaders = baseHeaders
+    }
     return await fetch(`${apiEndpoint}/${path}`, {
         method,
         credentials: "include",
-        headers: {
-            "Authorization": `chieribot ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json"
-        },
+        headers: reqHeaders,
         body: body ? JSON.stringify(body) : undefined,
     })
 }
 
 
-export async function apiRegister(userName: string, password: string, email: string): Promise<BaseRetData> {
+export async function apiRegister(userName: string, password: string, email: string, captchaToken: string): Promise<BaseRetData> {
     const resp = await fetchAPI("ai/draw/register", "POST", {
         username: userName,
         passwd: password,
         email: email
-    })
+    }, {"captcha-token": captchaToken})
     return resp.json()
 }
 
-export async function apiLogin(userName: string, password: string): Promise<LoginData> {
+export async function apiLogin(userName: string, password: string, captchaToken: string): Promise<LoginData> {
+    const myHeaders = new Headers();
+    myHeaders.append("no-captcha", "yesNoCaptcha");
+    myHeaders.append("Content-Type", "application/json");
     const resp = await fetchAPI("ai/draw/login", "POST", {
         username: userName,
         passwd: password
-    })
+    }, {"captcha-token": captchaToken})
     return resp.json()
 }
 

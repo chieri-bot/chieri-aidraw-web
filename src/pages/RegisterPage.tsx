@@ -5,6 +5,7 @@ import {PageType} from "../utils/enums.ts";
 import {apiRegister} from "../utils/api.ts";
 import {showErrorMessage, showInfoMessage} from "../utils/utils.ts";
 import {marginTopBottom} from "../styles.ts";
+import {recaptcha} from "./MainPage.tsx";
 
 
 export default function RegisterPage({pageTypeSet}: {pageTypeSet: (pageType: PageType) => void}) {
@@ -32,19 +33,27 @@ export default function RegisterPage({pageTypeSet}: {pageTypeSet: (pageType: Pag
 
     const onClickRegister = (values: {userName: string, password: string, password2: string, email: string}) => {
         setIsReging(true)
-        apiRegister(values.userName, values.password, values.email)
-            .then(
-            (result) => {
-                if (result.success) {
-                    showInfoMessage("", "注册成功", 5000)
-                    pageTypeSet(PageType.Login)
-                }
-                else {
-                    showErrorMessage(result.msg, "注册失败")
-                }
+
+        recaptcha.getToken("register")
+            .then((token) => {
+                apiRegister(values.userName, values.password, values.email, token)
+                    .then(
+                        (result) => {
+                            if (result.success) {
+                                showInfoMessage("", "注册成功", 5000)
+                                pageTypeSet(PageType.Login)
+                            }
+                            else {
+                                showErrorMessage(result.msg, "注册失败")
+                            }
+                        })
+                    .catch((e) => showErrorMessage(e.toString(), "错误"))
+                    .finally(() => setIsReging(false))
             })
-            .catch((e) => showErrorMessage(e.toString(), "错误"))
-            .finally(() => setIsReging(false))
+            .catch((e) => {
+                showErrorMessage(e.toString(), "reCaptcha Error")
+                    setIsReging(false)
+            })
     }
 
     return (

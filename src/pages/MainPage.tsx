@@ -7,6 +7,11 @@ import {UserData} from "../utils/models.ts";
 import DrawPage from "./DrawPage.tsx";
 import {apiGetLeftPoint, apiGetUserInfo} from "../utils/api.ts";
 import {showErrorMessage} from "../utils/utils.ts";
+import ReCaptcha from "../utils/reCaptcha.ts";
+
+
+export const recaptcha = new ReCaptcha()
+
 
 export default function MainPage() {
     const [currentStat, setCurrentStat] = useState(PageType.Login);
@@ -80,12 +85,17 @@ export default function MainPage() {
         if (token) {
             refreshUserData()
         }
+        recaptcha.render()
     }, []);
 
     const changePageStat = (pageType: PageType) => {
         setCurrentStat(pageType)
         if (pageType == PageType.Draw) {
             refreshUserData()
+            recaptcha.hideBandage()
+        }
+        else {
+            recaptcha.showBandage()
         }
     }
 

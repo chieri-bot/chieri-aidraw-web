@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {Grid, Button, Box, CloseButton, ScrollArea, Flex, Group} from '@mantine/core';
 import {SaveImageBlob} from "../utils/models.ts";
 import {backgroundFullImgStyle, maxWidth} from "../styles.ts";
-import * as JSZip from "jszip";
+import JSZip from "jszip";
 import {downloadFile, showErrorMessage} from "../utils/utils.ts";
 
 interface GenerateHistoryProps {

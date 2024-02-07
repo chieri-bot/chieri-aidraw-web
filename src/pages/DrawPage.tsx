@@ -21,13 +21,20 @@ import Icon from "@mdi/react";
 import {mdiDelete, mdiDownload, mdiHistory, mdiSeed} from "@mdi/js";
 import UserInfoHead from "../components/UserInfoHead.tsx";
 import {apiGenerate, apiGetCost} from "../utils/api.ts";
-import {downloadFile, getBlobImageDimensions, showErrorMessage, showWarningMessage} from "../utils/utils.ts";
+import {
+    downloadFile,
+    getBlobImageDimensions,
+    showErrorMessage,
+    showInfoMessage,
+    showWarningMessage
+} from "../utils/utils.ts";
 import {maxWidth, noMargin} from "../styles.ts";
 import {useDisclosure} from "@mantine/hooks";
 import DrawConfigs from "../components/DrawConfigs.tsx";
 import GenerateHistory from "../components/GenerateHistory.tsx";
 import GenerateButton from "../components/subs/GenerateButton.tsx";
 import {confirmDelete} from "../components/subs/confirms.tsx";
+import {recaptcha} from "./MainPage.tsx";
 
 
 type Action = { type: 'addFile' | 'removeFile' | 'clear' | 'replace' | 'noEdit'; payload?: SaveImageBlob; index?: number; newPayload?: SaveImageBlob[] }
@@ -48,7 +55,8 @@ function fileArrayChange(state: SaveImageBlob[], action: Action): SaveImageBlob[
             } break
         case 'removeFile':
             if (action.index !== undefined) {
-                return state.toSpliced(action.index, 1)
+                // return state.toSpliced(action.index, 1)
+                return [...state.slice(0, action.index), ...state.slice(action.index + 1)]
             } break
         case 'replace':
             if (action.newPayload !== undefined) {
@@ -216,7 +224,8 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
         handleResize()
         updateImageSize()
         refreshCost(currentFormValueRef)
-        window.addEventListener('resize', handleResize);
+        window.addEventListener('resize', handleResize)
+        recaptcha.hideBandage()
         return () => {
             window.removeEventListener('resize', handleResize);
         };
@@ -250,10 +259,55 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
 
     const moveImageToFirst = (index: number) => {
         const target = historyFiles[index]
-        const newArr = [target, ...historyFiles.toSpliced(index, 1)]
+        const newArr = [...historyFiles.slice(0, index), ...historyFiles.slice(index + 1)]
+        newArr.unshift(target)
+        // const target = historyFiles[index]
+        // const newArr = [target, ...historyFiles.toSpliced(index, 1)]
         updateCurrentImageURL(target.url)
         setLastImageSeed(target.seed)
         dispatcHistoryFiles({type: "replace", newPayload: newArr})
+    }
+
+    const doGenerate = async (reqData: {[p: string]: any}, retry: number = 0): Promise<number> => {
+        return new Promise((resolve, reject) => {
+            apiGenerate(reqData)
+                .then((result) => {
+                    if (result.status != 200) {
+                        result.json().then((result: BaseRetData) => {
+                            if (retry <= 3) {
+                                // showInfoMessage(retry.toString(), "重试")
+                                setTimeout(() => {
+                                    resolve(doGenerate(reqData, retry + 1));
+                                }, 6500)
+                            }
+                            else {
+                                showErrorMessage(result.msg, "生成失败", 5000)
+                                reject("生成失败")
+                            }
+                        })
+                    }
+                    else {
+                        setLastImageSeed(reqData.parameters.seed)
+                        result.blob().then((data) => {
+                            if (data.type.startsWith("image")) {
+                                const imgURL = URL.createObjectURL(data)
+                                updateCurrentImageURL(imgURL)
+                                // for (let i = 0; i < 60; i++)  // 测试用
+                                dispatcHistoryFiles({type: "addFile", payload: genSaveImageBlob(data, reqData.parameters.seed, imgURL)})
+                            }
+                            else {
+                                showErrorMessage(`未知的 Blob type: ${data.type}`, "生成异常")
+                            }
+                        })
+                        resolve(1)
+                    }
+                })
+                .catch((e) => {
+                    showErrorMessage(e.toString(), "生成失败")
+                    reject(e.toString())
+                })
+
+        })
     }
 
     const onClickGenerate = (values: BasePrompts) => {
@@ -270,30 +324,7 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
         }))
 
         setGenerating(true)
-        apiGenerate(reqData)
-            .then((result) => {
-                if (result.status != 200) {
-                    result.json().then((result: BaseRetData) => {
-                        showErrorMessage(result.msg, "生成失败", 5000)
-                    })
-                }
-                else {
-                    setLastImageSeed(reqData.parameters.seed)
-                    result.blob().then((data) => {
-                        if (data.type.startsWith("image")) {
-                            const imgURL = URL.createObjectURL(data)
-                            updateCurrentImageURL(imgURL)
-                            // for (let i = 0; i < 60; i++)  // 测试用
-                            dispatcHistoryFiles({type: "addFile", payload: genSaveImageBlob(data, reqData.parameters.seed, imgURL)})
-                        }
-                        else {
-                            showErrorMessage(`未知的 Blob type: ${data.type}`, "生成异常")
-                        }
-                    })
-                }
-
-            })
-            .catch((e) => showErrorMessage(e.toString(), "生成失败"))
+        doGenerate(reqData)
             .finally(() => {
                 refreshLeftPoint()
                 setGenerating(false)

@@ -7,6 +7,7 @@ import {showErrorMessage, showInfoMessage} from "../utils/utils.ts";
 import {confirmCheck} from "../components/subs/confirms.tsx";
 import copy from "clipboard-copy";
 import {marginTopBottom} from "../styles.ts";
+import {recaptcha} from "./MainPage.tsx";
 
 
 export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageType) => void}) {
@@ -24,19 +25,27 @@ export default function LoginPage({pageTypeSet}: {pageTypeSet: (pageType: PageTy
 
     const onClickLogin = (values: {userName: string, password: string}) => {
         setIsLoggingIn(true)
-        apiLogin(values.userName, values.password)
-            .then((result) => {
-                if (result.success) {
-                    localStorage.setItem("token", result.token!)
-                    showInfoMessage("", "登录成功", 3000)
-                    pageTypeSet(PageType.Draw)
-                }
-                else {
-                    showErrorMessage(result.msg, "登录失败")
-                }
+
+        recaptcha.getToken("login")
+            .then((token) => {
+                apiLogin(values.userName, values.password, token)
+                    .then((result) => {
+                        if (result.success) {
+                            localStorage.setItem("token", result.token!)
+                            showInfoMessage("", "登录成功", 3000)
+                            pageTypeSet(PageType.Draw)
+                        }
+                        else {
+                            showErrorMessage(result.msg, "登录失败")
+                        }
+                    })
+                    .catch((e) => showErrorMessage(e.toString(), "错误"))
+                    .finally(() => setIsLoggingIn(false))
             })
-            .catch((e) => showErrorMessage(e.toString(), "错误"))
-            .finally(() => setIsLoggingIn(false))
+            .catch((e) => {
+                showErrorMessage(e.toString(), "reCaptcha Error")
+                setIsLoggingIn(false)
+            })
     }
 
     const forgetPasswordConfirm = () => {
