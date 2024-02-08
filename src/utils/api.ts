@@ -4,7 +4,7 @@ import {BaseRetData, GetCostResponse, LeftPointResponse, LoginData, UserInfo} fr
 const apiEndpoint = import.meta.env.VITE_API_ENDPOINT
 
 
-export async function fetchAPI(path: string, method: string, body?: any, headers?: any) {
+export async function fetchAPI(path: string, method: string, body?: any, headers?: any): Promise<Response> {
     const baseHeaders = {...{
             "Authorization": `chieribot ${localStorage.getItem("token")}`,
             "Content-Type": "application/json"
@@ -16,11 +16,15 @@ export async function fetchAPI(path: string, method: string, body?: any, headers
     else {
         reqHeaders = baseHeaders
     }
-    return await fetch(`${apiEndpoint}/${path}`, {
-        method,
-        credentials: "include",
-        headers: reqHeaders,
-        body: body ? JSON.stringify(body) : undefined,
+    return new Promise((resolve, reject) => {
+        fetch(`${apiEndpoint}/${path}`, {
+            method,
+            credentials: "include",
+            headers: reqHeaders,
+            body: body ? JSON.stringify(body) : undefined,
+        })
+            .then((v) => resolve(v))
+            .catch((e) => reject(e))
     })
 }
 
@@ -51,7 +55,7 @@ export async function apiGetUserInfo(): Promise<UserInfo> {
 }
 
 export async function apiGenerate(body: any) {
-    return await fetchAPI("ai/draw/generate", "POST", body)
+    return fetchAPI("ai/draw/generate", "POST", body)
 }
 
 export async function apiGetCost(body: any): Promise<GetCostResponse> {

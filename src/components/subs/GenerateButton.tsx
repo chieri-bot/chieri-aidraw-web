@@ -4,12 +4,12 @@ import {UseFormReturnType} from "@mantine/form";
 import {BasePrompts} from "../../utils/models.ts";
 
 
-export default function GenerateButton({generating, onClickGenerate, form, hide, cost, onClickRefreshCost, refreshingCost, btnStyle}: {generating?: boolean,
+export default function GenerateButton({generating, onClickGenerate, form, hide, cost, onClickRefreshCost, refreshingCost, btnStyle, fullWidth}: {generating?: boolean,
     onClickGenerate: (v: BasePrompts) => any, form: UseFormReturnType<BasePrompts, (values: BasePrompts) => BasePrompts>,
-    hide: boolean, cost: number, onClickRefreshCost: () => any, refreshingCost: boolean, btnStyle?: CSSProperties}) {
+    hide: boolean, cost: number, onClickRefreshCost: () => any, refreshingCost: boolean, btnStyle?: CSSProperties, fullWidth: boolean}) {
 
     return (
-        <Button disabled={generating} loading={generating} fullWidth display={hide ? "none" : "unset"}
+        <Button disabled={generating} loading={generating} fullWidth={fullWidth} display={hide ? "none" : "unset"}
                 onClick={() => onClickGenerate(form.values)} justify="space-between" style={btnStyle}
                 rightSection={
                     <Tooltip label="点击刷新消耗">

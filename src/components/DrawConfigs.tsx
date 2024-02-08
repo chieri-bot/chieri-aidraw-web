@@ -17,11 +17,12 @@ import GenerateButton from "./subs/GenerateButton.tsx";
 
 
 export default function DrawConfigs({form, height, onClickGenerate, cardRef, onResolutionSetChange, resolutionSelectValue,
-                                        usePresetResolution, generating, cost, onClickRefreshCost, refreshingCost, plusH}: {
+                                        usePresetResolution, generating, cost, onClickRefreshCost, refreshingCost, plusH,
+                                         startGenerate}: {
     form: UseFormReturnType<BasePrompts, (values: BasePrompts) => BasePrompts>, height: number, onClickGenerate: (v: BasePrompts) => any,
     cardRef: React.MutableRefObject<HTMLDivElement | null>, onResolutionSetChange: (v: string | null) => any,
     resolutionSelectValue: string | null, usePresetResolution: boolean, generating: boolean, cost: number, onClickRefreshCost: () => Promise<number>,
-    refreshingCost: boolean, plusH: number
+    refreshingCost: boolean, plusH: number, startGenerate: (reqData: {[p: string]: any}) => any
 }) {
     const isRefreshingRef = useRef<boolean>(false)
     const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -58,7 +59,8 @@ export default function DrawConfigs({form, height, onClickGenerate, cardRef, onR
 
                         <PromptSelect form={form}/>
 
-                        <Img2Img form={form} setSelectValue={onResolutionSetChange} refreshCost={refreshCost}/>
+                        <Img2Img form={form} setSelectValue={onResolutionSetChange} refreshCost={refreshCost}
+                                 generating={generating} startGenerate={startGenerate}/>
 
                         <ResolutionSettings form={form} onResolutionSetChange={onResolutionSetChange}
                                             resolutionSelectValue={resolutionSelectValue}
@@ -69,7 +71,7 @@ export default function DrawConfigs({form, height, onClickGenerate, cardRef, onR
                     <Group justify="center" style={{marginTop: "1em"}}>
                         <GenerateButton generating={generating} onClickGenerate={onClickGenerate} form={form} hide={false}
                                         cost={cost} onClickRefreshCost={onClickRefreshCost} refreshingCost={refreshingCost}
-                                        btnStyle={plusH == 0 ? {marginLeft: "1em", marginRight: "1em"} : undefined} />
+                                        btnStyle={plusH == 0 ? {marginLeft: "1em", marginRight: "1em"} : undefined} fullWidth={true} />
                     </Group>
                 </Card>
 

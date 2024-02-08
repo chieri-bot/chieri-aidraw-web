@@ -25,7 +25,6 @@ import {
     downloadFile,
     getBlobImageDimensions,
     showErrorMessage,
-    showInfoMessage,
     showWarningMessage
 } from "../utils/utils.ts";
 import {maxWidth, noMargin} from "../styles.ts";
@@ -35,6 +34,7 @@ import GenerateHistory from "../components/GenerateHistory.tsx";
 import GenerateButton from "../components/subs/GenerateButton.tsx";
 import {confirmDelete} from "../components/subs/confirms.tsx";
 import {recaptcha} from "./MainPage.tsx";
+import UpScaleButton from "../components/subs/UpScaleButton.tsx";
 
 
 type Action = { type: 'addFile' | 'removeFile' | 'clear' | 'replace' | 'noEdit'; payload?: SaveImageBlob; index?: number; newPayload?: SaveImageBlob[] }
@@ -273,18 +273,28 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
             apiGenerate(reqData)
                 .then((result) => {
                     if (result.status != 200) {
-                        result.json().then((result: BaseRetData) => {
+                        const returnResult = (if_err_msg: string) => {
                             if (retry <= 3) {
                                 // showInfoMessage(retry.toString(), "重试")
                                 setTimeout(() => {
-                                    resolve(doGenerate(reqData, retry + 1));
-                                }, 6500)
+                                    doGenerate(reqData, retry + 1)
+                                        .then((result) => resolve(result))
+                                        .catch((e) => reject(e))
+                                }, 7000)
                             }
                             else {
-                                showErrorMessage(result.msg, "生成失败", 5000)
-                                reject("生成失败")
+                                // showErrorMessage(if_err_msg, "生成失败", 5000)
+                                reject("生成失败：达到最大重试次数")
                             }
-                        })
+                        }
+
+                        result.json()
+                            .then((result: BaseRetData) => {
+                                returnResult(result.msg)
+                            })
+                            .catch((e) => {
+                                returnResult(e.toString())
+                            })
                     }
                     else {
                         setLastImageSeed(reqData.parameters.seed)
@@ -303,11 +313,19 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
                     }
                 })
                 .catch((e) => {
-                    showErrorMessage(e.toString(), "生成失败")
-                    reject(e.toString())
+                    reject(e)
                 })
-
         })
+    }
+
+    const startGenerate = (reqData: {[p: string]: any}) => {
+        setGenerating(true)
+        doGenerate(reqData)
+            .catch((e) => showErrorMessage(e.toString(), "生成出错"))
+            .finally(() => {
+                refreshLeftPoint()
+                setGenerating(false)
+            })
     }
 
     const onClickGenerate = (values: BasePrompts) => {
@@ -322,13 +340,7 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
             }
             return value
         }))
-
-        setGenerating(true)
-        doGenerate(reqData)
-            .finally(() => {
-                refreshLeftPoint()
-                setGenerating(false)
-            })
+        startGenerate(reqData)
     }
 
     const onResolutionSetChange = (value: string | null) => {
@@ -355,7 +367,7 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
                     <DrawConfigs form={form} onResolutionSetChange={onResolutionSetChange}
                                  resolutionSelectValue={resolutionSelectValue}
                                  usePresetResolution={usePresetResolution} cardRef={cardRef} height={height}
-                                 generating={generating} refreshingCost={refreshingCost} plusH={0}
+                                 generating={generating} refreshingCost={refreshingCost} plusH={0} startGenerate={startGenerate}
                                  onClickGenerate={onClickGenerate} onClickRefreshCost={() => refreshCost(currentFormValueRef)} cost={currentCost}/>
                 </ScrollArea>}
             </AppShell.Navbar>
@@ -364,7 +376,7 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
                 <DrawConfigs form={form} onResolutionSetChange={onResolutionSetChange} resolutionSelectValue={resolutionSelectValue}
                              usePresetResolution={usePresetResolution} cardRef={cardRef} height={height} generating={generating}
                              onClickGenerate={onClickGenerate} onClickRefreshCost={() => refreshCost(currentFormValueRef)}
-                             cost={currentCost} refreshingCost={refreshingCost} plusH={70}/>
+                             cost={currentCost} refreshingCost={refreshingCost} plusH={70} startGenerate={startGenerate}/>
             </Drawer>
 
             <Modal opened={historyOpened} onClose={historyClose} title="生成历史" size="900px" centered>
@@ -386,12 +398,18 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
                     </Flex>
 
                     <Group justify="center" ref={imgCardEndAreaRef}>
-                        <GenerateButton generating={generating} onClickGenerate={onClickGenerate} form={form} hide={!burgerDisplay}
-                                        cost={currentCost} onClickRefreshCost={() => refreshCost(currentFormValueRef)} refreshingCost={refreshingCost}/>
+                        <Group justify="center" grow style={maxWidth}>
+                            <GenerateButton generating={generating} onClickGenerate={onClickGenerate} form={form} hide={!burgerDisplay} fullWidth={true}
+                                            cost={currentCost} onClickRefreshCost={() => refreshCost(currentFormValueRef)} refreshingCost={refreshingCost}/>
+                            <UpScaleButton imgUrl={currentImageURL} generating={generating} startGenerate={startGenerate} fullWidth={true} hide={!burgerDisplay}/>
+                        </Group>
                         <Group justify="space-between" style={maxWidth}>
-                            <ActionIcon variant="filled" color="red" onClick={() => deleteImage(0)} size="lg">
-                                <Icon path={mdiDelete} style={{ width: rem(18), height: rem(18) }}/>
-                            </ActionIcon>
+                            <Group>
+                                <ActionIcon variant="filled" color="red" onClick={() => deleteImage(0)} size="lg">
+                                    <Icon path={mdiDelete} style={{ width: rem(18), height: rem(18) }}/>
+                                </ActionIcon>
+                                <UpScaleButton imgUrl={currentImageURL} generating={generating} startGenerate={startGenerate} fullWidth={false} hide={burgerDisplay}/>
+                            </Group>
                             <Group>
                                 <ActionIcon variant="default" onClick={() => downloadCurrentImage()} size="lg"
                                         disabled={!currentImageURL}>

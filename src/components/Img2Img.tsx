@@ -1,14 +1,22 @@
 import React, {useRef, useState} from "react";
 import {Button, Card, FileButton, Flex, Group, Image, Slider, Text} from "@mantine/core";
 import {BasePrompts} from "../utils/models.ts";
-import {encodeImageToBase64, getImageDimensions, showErrorMessage} from "../utils/utils.ts";
+import {
+    calcImgFixedSize,
+    encodeImageToBase64,
+    getImageDimensions,
+    showErrorMessage,
+    showInfoMessage, showWarningMessage
+} from "../utils/utils.ts";
 import {UseFormReturnType} from "@mantine/form";
 import {backgroundStyle, maxWidth} from "../styles.ts";
+import UpScaleButton from "./subs/UpScaleButton.tsx";
 
 
-export default function Img2Img({form, setSelectValue, refreshCost}: {
+export default function Img2Img({form, setSelectValue, refreshCost, generating, startGenerate}: {
     form: UseFormReturnType<BasePrompts, (values: BasePrompts) => BasePrompts>,
-    setSelectValue:  (v: string | null) => any, refreshCost: () => any
+    setSelectValue:  (v: string | null) => any, refreshCost: () => any,
+    generating: boolean, startGenerate: (reqData: {[p: string]: any}) => any
 }) {
     const [file, setFile] = useState<File | null>(null)
     const [fileURL, setFileURL] = useState<string | null>(null)
@@ -17,20 +25,9 @@ export default function Img2Img({form, setSelectValue, refreshCost}: {
     const setWHByImage = (file: File) => {
         getImageDimensions(file)
             .then((result) => {
-                const setWH = {width: 832, height: 1216}
-                if (result.width > result.height) {
-                    setWH.width = 1216
-                    setWH.height = 832
-                }
-                if (result.width > setWH.width || result.height > setWH.height) {
-                    const ratio = Math.min(setWH.width / result.width, setWH.height / result.height)
-                    result.width = result.width * ratio
-                    result.height = result.height * ratio
-                }
-                result.width = Math.round(result.width / 64) * 64
-                result.height = Math.round(result.height / 64) * 64
-                form.setFieldValue("parameters.width", result.width)
-                form.setFieldValue("parameters.height", result.height)
+                const fixedSize = calcImgFixedSize(result)
+                form.setFieldValue("parameters.width", fixedSize.width)
+                form.setFieldValue("parameters.height", fixedSize.height)
                 setSelectValue(null)
             })
             .catch((e) => showErrorMessage(e.toString(), "获取图片参数失败"))
@@ -38,6 +35,10 @@ export default function Img2Img({form, setSelectValue, refreshCost}: {
     
     const onChangeFile = (file: File | null) => {
         if (!file) return
+        if (file.size > 8 * 1024 * 1024) {
+            showWarningMessage("图片不得超过 8MB", "图片过大")
+            return
+        }
         setFile(file)
         if (fileURL) URL.revokeObjectURL(fileURL)
         const url = URL.createObjectURL(new Blob([file], {type: file.type}))
@@ -89,6 +90,8 @@ export default function Img2Img({form, setSelectValue, refreshCost}: {
                     <Flex justify="flex-start" align="flex-start" direction="column"
                           wrap="wrap"
                           style={maxWidth}>
+                        <UpScaleButton imgUrl={fileURL} generating={generating} startGenerate={startGenerate} fullWidth={true} hide={false}/>
+
                         <Text>Strength: <Text span fw={500}>{form.values.img2imgPara.strength}</Text></Text>
                         <Slider
                             style={maxWidth}
@@ -117,7 +120,6 @@ export default function Img2Img({form, setSelectValue, refreshCost}: {
                                 refreshCost()
                             }}
                         />
-
                     </Flex>
                 }
 
