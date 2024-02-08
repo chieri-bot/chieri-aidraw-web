@@ -114,7 +114,7 @@ export default function UpScaleButton({imgUrl, generating, startGenerate, fullWi
                     }
                     rightSection={
                             <Button variant="outline" color="white" size="xs" disabled={!canUpscale}>
-                                消耗: 1
+                                消耗: 2
                             </Button>
                     }/>
         </Tooltip>
