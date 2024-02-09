@@ -1,4 +1,4 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Button, Card, FileButton, Flex, Group, Image, Slider, Text} from "@mantine/core";
 import {BasePrompts} from "../utils/models.ts";
 import {
@@ -13,15 +13,13 @@ import {backgroundStyle, maxWidth} from "../styles.ts";
 import UpScaleButton from "./subs/UpScaleButton.tsx";
 
 
-export default function Img2Img({form, setSelectValue, refreshCost, generating, startGenerate}: {
+export default function Img2Img({form, setSelectValue, refreshCost, generating, startGenerate, file, setFile, fileURL, setFileURL, resetRef}: {
     form: UseFormReturnType<BasePrompts, (values: BasePrompts) => BasePrompts>,
     setSelectValue:  (v: string | null) => any, refreshCost: () => any,
-    generating: boolean, startGenerate: (reqData: {[p: string]: any}) => any
+    generating: boolean, startGenerate: (reqData: {[p: string]: any}) => any,
+    file: File | null, setFile: (file: File | null) => any, fileURL: string | null, setFileURL: (url: string | null) => any,
+    resetRef: React.RefObject<() => void>
 }) {
-    const [file, setFile] = useState<File | null>(null)
-    const [fileURL, setFileURL] = useState<string | null>(null)
-    const resetRef = useRef<() => void>(null)
-    
     const setWHByImage = (file: File) => {
         getImageDimensions(file)
             .then((result) => {
@@ -90,7 +88,8 @@ export default function Img2Img({form, setSelectValue, refreshCost, generating, 
                     <Flex justify="flex-start" align="flex-start" direction="column"
                           wrap="wrap"
                           style={maxWidth}>
-                        <UpScaleButton imgUrl={fileURL} generating={generating} startGenerate={startGenerate} fullWidth={true} hide={false}/>
+                        <UpScaleButton imgUrl={fileURL} generating={generating} startGenerate={startGenerate} fullDisplay={true}
+                                       fullWidth={true} hide={false}/>
 
                         <Text>Strength: <Text span fw={500}>{form.values.img2imgPara.strength}</Text></Text>
                         <Slider

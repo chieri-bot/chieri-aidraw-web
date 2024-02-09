@@ -130,7 +130,11 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
 
     const [currentCost, setCurrentCost] = useState(1)
     const [refreshingCost, setRefreshingCost] = useState(false)
-    const [historyFiles, dispatcHistoryFiles] = useReducer(fileArrayChange, []);
+    const [historyFiles, dispatcHistoryFiles] = useReducer(fileArrayChange, [])
+
+    const [file, setFile] = useState<File | null>(null)
+    const [fileURL, setFileURL] = useState<string | null>(null)
+    const resetRef = useRef<() => void>(null)
 
     const updateImageSize = (imgVec?: Rect) => {
         const img = imgRef.current
@@ -274,23 +278,27 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
                 .then((result) => {
                     if (result.status != 200) {
                         const returnResult = (if_err_msg: string) => {
-                            if (retry <= 3) {
+                            if (result.status < 500) {
+                                reject(if_err_msg)
+                                return
+                            }
+                            if (retry <= 5) {
                                 // showInfoMessage(retry.toString(), "重试")
                                 setTimeout(() => {
                                     doGenerate(reqData, retry + 1)
                                         .then((result) => resolve(result))
                                         .catch((e) => reject(e))
-                                }, 7000)
+                                }, 5000)
                             }
                             else {
                                 // showErrorMessage(if_err_msg, "生成失败", 5000)
-                                reject("生成失败：达到最大重试次数")
+                                reject(`生成失败：达到最大重试次数 (${if_err_msg})`)
                             }
                         }
 
                         result.json()
-                            .then((result: BaseRetData) => {
-                                returnResult(result.msg)
+                            .then((resultJson: BaseRetData) => {
+                                returnResult(resultJson.msg)
                             })
                             .catch((e) => {
                                 returnResult(e.toString())
@@ -368,7 +376,9 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
                                  resolutionSelectValue={resolutionSelectValue}
                                  usePresetResolution={usePresetResolution} cardRef={cardRef} height={height}
                                  generating={generating} refreshingCost={refreshingCost} plusH={0} startGenerate={startGenerate}
-                                 onClickGenerate={onClickGenerate} onClickRefreshCost={() => refreshCost(currentFormValueRef)} cost={currentCost}/>
+                                 onClickGenerate={onClickGenerate} onClickRefreshCost={() => refreshCost(currentFormValueRef)}
+                                 cost={currentCost} file={file} setFile={setFile} fileURL={fileURL} setFileURL={setFileURL}
+                                 resetRef={resetRef}/>
                 </ScrollArea>}
             </AppShell.Navbar>
 
@@ -376,7 +386,8 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
                 <DrawConfigs form={form} onResolutionSetChange={onResolutionSetChange} resolutionSelectValue={resolutionSelectValue}
                              usePresetResolution={usePresetResolution} cardRef={cardRef} height={height} generating={generating}
                              onClickGenerate={onClickGenerate} onClickRefreshCost={() => refreshCost(currentFormValueRef)}
-                             cost={currentCost} refreshingCost={refreshingCost} plusH={70} startGenerate={startGenerate}/>
+                             cost={currentCost} refreshingCost={refreshingCost} plusH={70} startGenerate={startGenerate}
+                             file={file} setFile={setFile} fileURL={fileURL} setFileURL={setFileURL} resetRef={resetRef}/>
             </Drawer>
 
             <Modal opened={historyOpened} onClose={historyClose} title="生成历史" size="900px" centered>
@@ -398,17 +409,19 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
                     </Flex>
 
                     <Group justify="center" ref={imgCardEndAreaRef}>
-                        <Group justify="center" grow style={maxWidth}>
-                            <GenerateButton generating={generating} onClickGenerate={onClickGenerate} form={form} hide={!burgerDisplay} fullWidth={true}
+                        <Group justify="center" grow preventGrowOverflow={false} style={maxWidth}>
+                            <UpScaleButton imgUrl={currentImageURL} generating={generating} startGenerate={startGenerate}
+                                           fullDisplay={!burgerDisplay} fullWidth={false} hide={!burgerDisplay}/>
+                            <GenerateButton generating={generating} onClickGenerate={onClickGenerate} form={form} hide={!burgerDisplay} fullWidth={false}
                                             cost={currentCost} onClickRefreshCost={() => refreshCost(currentFormValueRef)} refreshingCost={refreshingCost}/>
-                            <UpScaleButton imgUrl={currentImageURL} generating={generating} startGenerate={startGenerate} fullWidth={true} hide={!burgerDisplay}/>
                         </Group>
                         <Group justify="space-between" style={maxWidth}>
-                            <Group>
+                            <Group justify="space-between">
                                 <ActionIcon variant="filled" color="red" onClick={() => deleteImage(0)} size="lg">
                                     <Icon path={mdiDelete} style={{ width: rem(18), height: rem(18) }}/>
                                 </ActionIcon>
-                                <UpScaleButton imgUrl={currentImageURL} generating={generating} startGenerate={startGenerate} fullWidth={false} hide={burgerDisplay}/>
+                                <UpScaleButton imgUrl={currentImageURL} generating={generating} startGenerate={startGenerate} fullDisplay={!burgerDisplay}
+                                               fullWidth={false} hide={burgerDisplay}/>
                             </Group>
                             <Group>
                                 <ActionIcon variant="default" onClick={() => downloadCurrentImage()} size="lg"

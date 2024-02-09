@@ -1,4 +1,4 @@
-import React, {useRef} from "react";
+import React, {useRef, useState} from "react";
 import {
     Card,
     Flex,
@@ -18,11 +18,13 @@ import GenerateButton from "./subs/GenerateButton.tsx";
 
 export default function DrawConfigs({form, height, onClickGenerate, cardRef, onResolutionSetChange, resolutionSelectValue,
                                         usePresetResolution, generating, cost, onClickRefreshCost, refreshingCost, plusH,
-                                         startGenerate}: {
+                                         startGenerate, file, setFile, fileURL, setFileURL, resetRef}: {
     form: UseFormReturnType<BasePrompts, (values: BasePrompts) => BasePrompts>, height: number, onClickGenerate: (v: BasePrompts) => any,
     cardRef: React.MutableRefObject<HTMLDivElement | null>, onResolutionSetChange: (v: string | null) => any,
     resolutionSelectValue: string | null, usePresetResolution: boolean, generating: boolean, cost: number, onClickRefreshCost: () => Promise<number>,
-    refreshingCost: boolean, plusH: number, startGenerate: (reqData: {[p: string]: any}) => any
+    refreshingCost: boolean, plusH: number, startGenerate: (reqData: {[p: string]: any}) => any,
+    file: File | null, setFile: (file: File | null) => any, fileURL: string | null, setFileURL: (url: string | null) => any,
+    resetRef: React.RefObject<() => void>
 }) {
     const isRefreshingRef = useRef<boolean>(false)
     const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -60,7 +62,8 @@ export default function DrawConfigs({form, height, onClickGenerate, cardRef, onR
                         <PromptSelect form={form}/>
 
                         <Img2Img form={form} setSelectValue={onResolutionSetChange} refreshCost={refreshCost}
-                                 generating={generating} startGenerate={startGenerate}/>
+                                 generating={generating} startGenerate={startGenerate} file={file} setFile={setFile}
+                                 fileURL={fileURL} setFileURL={setFileURL} resetRef={resetRef}/>
 
                         <ResolutionSettings form={form} onResolutionSetChange={onResolutionSetChange}
                                             resolutionSelectValue={resolutionSelectValue}

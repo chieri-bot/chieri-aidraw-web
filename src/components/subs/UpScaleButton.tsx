@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Button, Group, rem, Tooltip} from "@mantine/core";
+import {ActionIcon, Button, Group, rem, Text, Tooltip} from "@mantine/core";
 import {Rect} from "../../utils/models.ts";
 import {
     calcImgFixedSize,
@@ -8,13 +8,13 @@ import {
     showErrorMessage
 } from "../../utils/utils.ts";
 import Icon from "@mdi/react";
-import {mdiArrowExpand} from "@mdi/js";
+import {mdiImageSizeSelectLarge} from "@mdi/js";
 
 
 const UPSCALE = 4
 
-export default function UpScaleButton({imgUrl, generating, startGenerate, fullWidth, hide}: {
-    imgUrl: string | null, generating: boolean, startGenerate: (reqData: {[p: string]: any}) => any, fullWidth: boolean, hide: boolean
+export default function UpScaleButton({imgUrl, generating, startGenerate, fullDisplay, fullWidth, hide}: {
+    imgUrl: string | null, generating: boolean, startGenerate: (reqData: {[p: string]: any}) => any, fullDisplay: boolean, fullWidth: boolean, hide: boolean
 }) {
     const [canUpscale, setCanUpscale] = useState(false)
     const [origImgSize, setOrigImgSize] = useState<Rect>({width: -1, height: -1})
@@ -103,20 +103,24 @@ export default function UpScaleButton({imgUrl, generating, startGenerate, fullWi
 
     return (
         <Tooltip label={`(${origImgSize.width}, ${origImgSize.height}) => (${fixedImgSize.width * UPSCALE}, ${fixedImgSize.height * UPSCALE})`}>
-            <Button disabled={!canUpscale || generating} loading={generating} fullWidth={fullWidth} display={hide ? "none" : "unset"}
-                    onClick={() => onClickUpscale(imgUrl)} justify="space-between"
-                    leftSection={
-                        <Group>{!fullWidth &&
-                            <Icon path={mdiArrowExpand} style={{ width: rem(18), height: rem(18) }}/>
-                        }
-                            超分
-                        </Group>
-                    }
-                    rightSection={
-                            <Button variant="outline" color="white" size="xs" disabled={!canUpscale}>
-                                消耗: 2
-                            </Button>
-                    }/>
+            {fullDisplay && <Button disabled={!canUpscale || generating} fullWidth={fullWidth} display={hide ? "none" : "unset"}
+                     onClick={() => onClickUpscale(imgUrl)} justify="space-between"
+                     leftSection={
+                         <Group>
+                             <Icon path={mdiImageSizeSelectLarge} style={{width: rem(18), height: rem(18)}}/>
+                             超分
+                         </Group>
+                     }
+                     rightSection={
+                         <Button variant="outline" color="white" size="xs" disabled={!canUpscale}>
+                             消耗: 2
+                         </Button>
+                     }>
+            </Button> ||
+                <ActionIcon variant="filled" onClick={() => onClickUpscale(imgUrl)} size="lg" maw={34} display={hide ? "none" : "unset"}
+                            disabled={!canUpscale || generating}>
+                    <Icon path={mdiImageSizeSelectLarge} style={{ width: rem(18), height: rem(18) }}/>
+                </ActionIcon>}
         </Tooltip>
     )
 }
