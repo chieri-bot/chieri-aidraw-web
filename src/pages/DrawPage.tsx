@@ -230,9 +230,16 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
         refreshCost(currentFormValueRef)
         window.addEventListener('resize', handleResize)
         recaptcha.hideBandage()
+        if (!form.values.otherSets.resolutionSelect) {
+            setUsePresetResolution(false)
+        }
+        else {
+            setUsePresetResolution(true)
+        }
+
         return () => {
-            window.removeEventListener('resize', handleResize);
-        };
+            window.removeEventListener('resize', handleResize)
+        }
     }, []);
 
     const downloadCurrentImage = () => {
