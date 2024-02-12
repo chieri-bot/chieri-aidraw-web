@@ -319,6 +319,7 @@ export default function DrawPage({pageTypeSet, userData, refreshUserData, refres
                                 updateCurrentImageURL(imgURL)
                                 // for (let i = 0; i < 60; i++)  // 测试用
                                 dispatcHistoryFiles({type: "addFile", payload: genSaveImageBlob(data, reqData.parameters.seed, imgURL)})
+                                // refreshCost(currentFormValueRef)
                             }
                             else {
                                 showErrorMessage(`未知的 Blob type: ${data.type}`, "生成异常")

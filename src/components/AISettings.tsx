@@ -80,23 +80,36 @@ export default function AISettings({form, refreshCost}: {
                 />
 
                 <Group justify="space-between" style={{...maxWidth}} grow align="start">
-                    <NumberInput min={0} max={9999999999} allowNegative={false} allowDecimal={false} maxLength={10}
-                                 label="Seed"
-                                 hideControls
-                                 placeholder="自定义种子，留空为随机。"
-                                 rightSection={
-                                     <CloseButton
-                                         aria-label="Clear input"
-                                         onClick={() => form.setFieldValue('parameters.seed', '')}
-                                         style={{ display: form.values.parameters.seed === '' ? 'none' : undefined }}
-                                     />
-                                 }
-                                 {...form.getInputProps('parameters.seed')}
-                                 onBlur={(v) => {
-                                     form.getInputProps('parameters.seed').onBlur(v)
-                                     refreshCost()
-                                 }}
-                    />
+                    <Group>
+                        <NumberInput min={0} max={9999999999} allowNegative={false} allowDecimal={false} maxLength={10}
+                                     label="Seed"
+                                     hideControls
+                                     placeholder="自定义种子，留空为随机。"
+                                     rightSection={
+                                         <CloseButton
+                                             aria-label="Clear input"
+                                             onClick={() => form.setFieldValue('parameters.seed', '')}
+                                             style={{ display: form.values.parameters.seed === '' ? 'none' : undefined }}
+                                         />
+                                     }
+                                     {...form.getInputProps('parameters.seed')}
+                                     onBlur={(v) => {
+                                         form.getInputProps('parameters.seed').onBlur(v)
+                                         refreshCost()
+                                     }}
+                        />
+
+                        <Tooltip label="Use built-in preprocessor to reduce the point consumption.">
+                            <Checkbox label="ECO Mode" defaultChecked={form.values.eco_chieri}
+                                      {...form.getInputProps('eco_chieri')}
+                                      onChange={(v) => {
+                                          form.getInputProps('eco_chieri').onChange(v)
+                                          refreshCost()
+                                      }}
+                            />
+                        </Tooltip>
+                    </Group>
+
 
                     <Group>
                         <Select

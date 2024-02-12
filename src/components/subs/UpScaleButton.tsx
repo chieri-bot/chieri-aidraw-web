@@ -9,6 +9,7 @@ import {
 } from "../../utils/utils.ts";
 import Icon from "@mdi/react";
 import {mdiImageSizeSelectLarge} from "@mdi/js";
+import {confirmCheck} from "./confirms.tsx";
 
 
 const UPSCALE = 4
@@ -73,29 +74,39 @@ export default function UpScaleButton({imgUrl, generating, startGenerate, fullDi
             getFixedSize(imgUrl)
                 .then((result) => {
                     const origSize = result[0]
-                    const fixedSize = result[1]
-                    if ((fixedSize.width * UPSCALE * fixedSize.height * UPSCALE) <= (origSize.width * origSize.height)) {
-                        showErrorMessage("图片分辨率过大", "错误")
-                    }
-                    else {
-                        if (origSize.width * origSize.height > fixedSize.width * fixedSize.height) {
-                            resizeImage(imgUrl, fixedSize)
-                                .then((newImgUrl) => {
-                                    encodeImageURLToBase64(newImgUrl)
-                                        .then((imgB64) => {
-                                            startRescale(imgB64, fixedSize)
-                                        })
-                                        .catch((e) => showErrorMessage(e.toString(), "图片编码出错"))
-                                })
+                    const doUpscale = () => {
+                        const fixedSize = result[1]
+                        if ((fixedSize.width * UPSCALE * fixedSize.height * UPSCALE) <= (origSize.width * origSize.height)) {
+                            showErrorMessage("图片分辨率过大", "错误")
                         }
                         else {
-                            encodeImageURLToBase64(imgUrl)
-                                .then((imgB64) => {
-                                    startRescale(imgB64, fixedSize)
-                                })
-                                .catch((e) => showErrorMessage(e.toString(), "图片编码出错"))
-                        }
+                            if (origSize.width * origSize.height > fixedSize.width * fixedSize.height) {
+                                resizeImage(imgUrl, fixedSize)
+                                    .then((newImgUrl) => {
+                                        encodeImageURLToBase64(newImgUrl)
+                                            .then((imgB64) => {
+                                                startRescale(imgB64, fixedSize)
+                                            })
+                                            .catch((e) => showErrorMessage(e.toString(), "图片编码出错"))
+                                    })
+                            }
+                            else {
+                                encodeImageURLToBase64(imgUrl)
+                                    .then((imgB64) => {
+                                        startRescale(imgB64, fixedSize)
+                                    })
+                                    .catch((e) => showErrorMessage(e.toString(), "图片编码出错"))
+                            }
 
+                        }
+                    }
+                    if (origSize.width * origSize.height > 1024 * 1024) {
+                        confirmCheck("注意", "分辨率超过1024*1024的图片，超分效果可能不理想。", () => {
+                            doUpscale()
+                        })
+                    }
+                    else {
+                        doUpscale()
                     }
                 })
         }

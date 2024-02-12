@@ -39,6 +39,7 @@ export interface BasePrompts {
     prompt: string[],
     model: string,
     action: string,
+    eco_chieri: boolean,
     parameters: {
         width: number,
         height: number,

@@ -136,6 +136,7 @@ export function getDrawRequestBody(values: BasePrompts) {
         "input": `${values.prompt.join(", ")}${values.otherSets.addQualityTags ? ", , best quality, amazing quality, very aesthetic, absurdres" : ""}`,
         "model": values.model,
         "action": values.action,
+        "eco_chieri": values.eco_chieri,
         "parameters": {
             "params_version": 1,
             "width": values.parameters.width,

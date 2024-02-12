@@ -132,6 +132,7 @@ export const getDefaultFormInit = (): BasePrompts => {
         prompt: [],
         model: "nai-diffusion-3",
         action: "generate",
+        eco_chieri: true,
         parameters: {
             width: 832,
             height: 1216,
